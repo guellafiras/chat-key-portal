@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Loader2, ExternalLink } from "lucide-react";
 import type { ApiKeys } from "./ApiKeyForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { callOpenAiApi, callAnthropicApi, callPerplexityApi } from "@/utils/apiUtils";
+import { callGrokApi, callOpenAiApi, callAnthropicApi, callPerplexityApi } from "@/utils/apiUtils";
 
 interface Message {
   content: string;
@@ -21,7 +21,7 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<"openai" | "anthropic" | "perplexity">("openai");
+  const [selectedModel, setSelectedModel] = useState<"openai" | "anthropic" | "perplexity" | "grok">("openai");
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,6 +42,9 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
       switch (selectedModel) {
         case "openai":
           aiMessage = await callOpenAiApi(userMessage, apiKeys.openai!);
+          break;
+        case "grok":
+          aiMessage = await callGrokApi(userMessage, apiKeys.grok!);
           break;
         case "anthropic":
           aiMessage = await callAnthropicApi(userMessage, apiKeys.anthropic!);
@@ -97,6 +100,7 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
             <SelectItem value="openai">OpenAI</SelectItem>
             <SelectItem value="anthropic">Anthropic</SelectItem>
             <SelectItem value="perplexity">Perplexity</SelectItem>
+            <SelectItem value="grok">Grok</SelectItem>
           </SelectContent>
         </Select>
       </div>
