@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChatMessage } from "./ChatMessage";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, ExternalLink } from "lucide-react";
 import type { ApiKeys } from "./ApiKeyForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -59,7 +59,6 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
           break;
 
         case "grok":
-          // Create a proxy URL using a service like cors-anywhere or your own backend
           const proxyUrl = "https://cors-anywhere.herokuapp.com/https://api.x.ai/chat/completions";
           response = await fetch(proxyUrl, {
             method: "POST",
@@ -76,6 +75,13 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
               temperature: 0.7
             }),
           });
+          
+          if (response.status === 403) {
+            throw new Error(
+              "CORS proxy access not granted. Please visit https://cors-anywhere.herokuapp.com/corsdemo and request temporary access."
+            );
+          }
+          
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             throw new Error(`Failed to get response from Grok: ${errorData.error?.message || response.statusText}`);
@@ -123,11 +129,31 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
       setMessages((prev) => [...prev, { content: aiMessage, isAi: true }]);
     } catch (error) {
       console.error("API Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to get AI response",
-      });
+      if (error instanceof Error && error.message.includes("CORS proxy access not granted")) {
+        toast({
+          variant: "destructive",
+          title: "CORS Proxy Access Required",
+          description: (
+            <div className="flex flex-col space-y-2">
+              <span>Please enable CORS proxy access first:</span>
+              <a
+                href="https://cors-anywhere.herokuapp.com/corsdemo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-blue-500 hover:text-blue-600"
+              >
+                Visit CORS Demo Page <ExternalLink className="ml-1 h-4 w-4" />
+              </a>
+            </div>
+          ),
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to get AI response",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
