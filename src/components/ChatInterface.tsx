@@ -59,7 +59,7 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
           break;
 
         case "grok":
-          response = await fetch("https://api.x.ai/v1/chat/completions", {
+          response = await fetch("https://api.x.ai/chat/completions", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -67,7 +67,6 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
               "X-Api-Key": apiKeys.grok
             },
             body: JSON.stringify({
-              model: "grok-1",
               messages: [{ role: "user", content: userMessage }],
               stream: false,
               max_tokens: 1000,
