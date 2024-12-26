@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Loader2, ExternalLink } from "lucide-react";
 import type { ApiKeys } from "./ApiKeyForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { callGrokApi, callOpenAiApi, callAnthropicApi, callPerplexityApi } from "@/utils/apiUtils";
 
 interface Message {
   content: string;
@@ -37,91 +38,20 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
         throw new Error(`Please add your ${selectedModel.toUpperCase()} API key first`);
       }
 
-      let response;
       let aiMessage;
-
       switch (selectedModel) {
         case "openai":
-          response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKeys.openai}`,
-            },
-            body: JSON.stringify({
-              model: "gpt-3.5-turbo",
-              messages: [{ role: "user", content: userMessage }],
-            }),
-          });
-          if (!response.ok) throw new Error("Failed to get response from OpenAI");
-          const openAiData = await response.json();
-          aiMessage = openAiData.choices[0].message.content;
+          aiMessage = await callOpenAiApi(userMessage, apiKeys.openai!);
           break;
-
         case "grok":
-          const proxyUrl = "https://cors-anywhere.herokuapp.com/https://api.x.ai/chat/completions";
-          response = await fetch(proxyUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${apiKeys.grok}`,
-              "X-Api-Key": apiKeys.grok,
-              "X-Requested-With": "XMLHttpRequest"
-            },
-            body: JSON.stringify({
-              messages: [{ role: "user", content: userMessage }],
-              stream: false,
-              max_tokens: 1000,
-              temperature: 0.7
-            }),
-          });
-          
-          if (response.status === 403) {
-            throw new Error(
-              "CORS proxy access not granted. Please visit https://cors-anywhere.herokuapp.com/corsdemo and request temporary access."
-            );
-          }
-          
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(`Failed to get response from Grok: ${errorData.error?.message || response.statusText}`);
-          }
-          const grokData = await response.json();
-          aiMessage = grokData.choices[0].message.content;
+          aiMessage = await callGrokApi(userMessage, apiKeys.grok!);
           break;
-
         case "anthropic":
-          response = await fetch("https://api.anthropic.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKeys.anthropic}`,
-            },
-            body: JSON.stringify({
-              messages: [{ role: "user", content: userMessage }],
-            }),
-          });
-          if (!response.ok) throw new Error("Failed to get response from Anthropic");
-          const anthropicData = await response.json();
-          aiMessage = anthropicData.choices[0].message.content;
+          aiMessage = await callAnthropicApi(userMessage, apiKeys.anthropic!);
           break;
-
         case "perplexity":
-          response = await fetch("https://api.perplexity.ai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKeys.perplexity}`,
-            },
-            body: JSON.stringify({
-              messages: [{ role: "user", content: userMessage }],
-            }),
-          });
-          if (!response.ok) throw new Error("Failed to get response from Perplexity");
-          const perplexityData = await response.json();
-          aiMessage = perplexityData.choices[0].message.content;
+          aiMessage = await callPerplexityApi(userMessage, apiKeys.perplexity!);
           break;
-
         default:
           throw new Error("Invalid model selected");
       }
