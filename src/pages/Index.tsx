@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ApiKeyForm, type ApiKeys } from "@/components/ApiKeyForm";
 import { ChatInterface } from "@/components/ChatInterface";
+import { LLMConversation } from "@/components/LLMConversation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const [apiKeys, setApiKeys] = useState<ApiKeys>({});
@@ -20,8 +22,20 @@ const Index = () => {
           </div>
           
           <div>
-            <h2 className="text-xl font-semibold mb-4">Chat</h2>
-            <ChatInterface apiKeys={apiKeys} />
+            <Tabs defaultValue="chat">
+              <TabsList className="mb-4">
+                <TabsTrigger value="chat">Single Chat</TabsTrigger>
+                <TabsTrigger value="conversation">LLM Conversation</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="chat">
+                <ChatInterface apiKeys={apiKeys} />
+              </TabsContent>
+              
+              <TabsContent value="conversation">
+                <LLMConversation apiKeys={apiKeys} />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
