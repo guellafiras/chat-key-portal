@@ -59,17 +59,25 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
           break;
 
         case "grok":
-          response = await fetch("https://api.grok.x.ai/v1/chat/completions", {
+          response = await fetch("https://api.x.ai/v1/chat/completions", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${apiKeys.grok}`,
+              "X-Api-Key": apiKeys.grok
             },
             body: JSON.stringify({
+              model: "grok-1",
               messages: [{ role: "user", content: userMessage }],
+              stream: false,
+              max_tokens: 1000,
+              temperature: 0.7
             }),
           });
-          if (!response.ok) throw new Error("Failed to get response from Grok");
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Failed to get response from Grok: ${errorData.error?.message || response.statusText}`);
+          }
           const grokData = await response.json();
           aiMessage = grokData.choices[0].message.content;
           break;
@@ -112,6 +120,7 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
 
       setMessages((prev) => [...prev, { content: aiMessage, isAi: true }]);
     } catch (error) {
+      console.error("API Error:", error);
       toast({
         variant: "destructive",
         title: "Error",
