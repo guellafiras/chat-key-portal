@@ -59,18 +59,16 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
           break;
 
         case "grok":
-          response = await fetch("https://api.x.ai/chat/completions", {
+          // Create a proxy URL using a service like cors-anywhere or your own backend
+          const proxyUrl = "https://cors-anywhere.herokuapp.com/https://api.x.ai/chat/completions";
+          response = await fetch(proxyUrl, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${apiKeys.grok}`,
               "X-Api-Key": apiKeys.grok,
-              "Origin": window.location.origin,
-              "Access-Control-Request-Method": "POST",
-              "Access-Control-Request-Headers": "Content-Type, Authorization, X-Api-Key"
+              "X-Requested-With": "XMLHttpRequest"
             },
-            credentials: "include",
-            mode: "cors",
             body: JSON.stringify({
               messages: [{ role: "user", content: userMessage }],
               stream: false,
