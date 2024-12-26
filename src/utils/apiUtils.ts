@@ -9,7 +9,7 @@ export const callGrokApi = async (userMessage: string, apiKey: string) => {
       "X-Requested-With": "XMLHttpRequest"
     },
     body: JSON.stringify({
-      model: "grok-v2",
+      model: "grok-1",
       messages: [{ role: "user", content: userMessage }],
       stream: false,
       max_tokens: 1000,
