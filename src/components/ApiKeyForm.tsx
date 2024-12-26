@@ -8,6 +8,7 @@ export type ApiKeys = {
   openai?: string;
   anthropic?: string;
   perplexity?: string;
+  grok?: string;
 };
 
 interface ApiKeyFormProps {
@@ -69,6 +70,17 @@ export const ApiKeyForm = ({ onKeysUpdate }: ApiKeyFormProps) => {
           value={keys.perplexity || ""}
           onChange={(e) => setKeys({ ...keys, perplexity: e.target.value })}
           placeholder="pplx-..."
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="grok">Grok API Key</Label>
+        <Input
+          id="grok"
+          type="password"
+          value={keys.grok || ""}
+          onChange={(e) => setKeys({ ...keys, grok: e.target.value })}
+          placeholder="grok-..."
         />
       </div>
 

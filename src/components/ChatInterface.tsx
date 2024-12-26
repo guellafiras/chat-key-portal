@@ -5,6 +5,7 @@ import { ChatMessage } from "./ChatMessage";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import type { ApiKeys } from "./ApiKeyForm";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Message {
   content: string;
@@ -19,6 +20,7 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<"openai" | "anthropic" | "perplexity" | "grok">("openai");
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,29 +33,82 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
     setIsLoading(true);
 
     try {
-      // For now, we'll use OpenAI as the default
-      if (!apiKeys.openai) {
-        throw new Error("Please add your OpenAI API key first");
+      if (!apiKeys[selectedModel]) {
+        throw new Error(`Please add your ${selectedModel.toUpperCase()} API key first`);
       }
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKeys.openai}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: userMessage }],
-        }),
-      });
+      let response;
+      let aiMessage;
 
-      if (!response.ok) {
-        throw new Error("Failed to get response from AI");
+      switch (selectedModel) {
+        case "openai":
+          response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKeys.openai}`,
+            },
+            body: JSON.stringify({
+              model: "gpt-3.5-turbo",
+              messages: [{ role: "user", content: userMessage }],
+            }),
+          });
+          if (!response.ok) throw new Error("Failed to get response from OpenAI");
+          const openAiData = await response.json();
+          aiMessage = openAiData.choices[0].message.content;
+          break;
+
+        case "grok":
+          response = await fetch("https://api.grok.x.ai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKeys.grok}`,
+            },
+            body: JSON.stringify({
+              messages: [{ role: "user", content: userMessage }],
+            }),
+          });
+          if (!response.ok) throw new Error("Failed to get response from Grok");
+          const grokData = await response.json();
+          aiMessage = grokData.choices[0].message.content;
+          break;
+
+        case "anthropic":
+          response = await fetch("https://api.anthropic.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKeys.anthropic}`,
+            },
+            body: JSON.stringify({
+              messages: [{ role: "user", content: userMessage }],
+            }),
+          });
+          if (!response.ok) throw new Error("Failed to get response from Anthropic");
+          const anthropicData = await response.json();
+          aiMessage = anthropicData.choices[0].message.content;
+          break;
+
+        case "perplexity":
+          response = await fetch("https://api.perplexity.ai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKeys.perplexity}`,
+            },
+            body: JSON.stringify({
+              messages: [{ role: "user", content: userMessage }],
+            }),
+          });
+          if (!response.ok) throw new Error("Failed to get response from Perplexity");
+          const perplexityData = await response.json();
+          aiMessage = perplexityData.choices[0].message.content;
+          break;
+
+        default:
+          throw new Error("Invalid model selected");
       }
-
-      const data = await response.json();
-      const aiMessage = data.choices[0].message.content;
 
       setMessages((prev) => [...prev, { content: aiMessage, isAi: true }]);
     } catch (error) {
@@ -69,6 +124,20 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
 
   return (
     <div className="flex flex-col h-[600px] bg-white rounded-lg shadow">
+      <div className="p-4 border-b">
+        <Select value={selectedModel} onValueChange={(value: any) => setSelectedModel(value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Model" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="openai">OpenAI</SelectItem>
+            <SelectItem value="anthropic">Anthropic</SelectItem>
+            <SelectItem value="perplexity">Perplexity</SelectItem>
+            <SelectItem value="grok">Grok</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message, index) => (
           <ChatMessage
