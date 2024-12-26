@@ -60,19 +60,19 @@ export const callOpenAiApi = async (userMessage: string, apiKey: string) => {
 };
 
 export const callAnthropicApi = async (userMessage: string, apiKey: string) => {
-  const proxyUrl = `${CORS_PROXY}https://api.anthropic.com/v1/chat/completions`;
+  const proxyUrl = `${CORS_PROXY}https://api.anthropic.com/v1/messages`;
   const response = await fetch(proxyUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
+      "x-api-key": apiKey,
       "X-Requested-With": "XMLHttpRequest",
       "anthropic-version": "2023-06-01"
     },
     body: JSON.stringify({
-      model: "claude-2",
-      messages: [{ role: "user", content: userMessage }],
-      max_tokens: 1000
+      model: "claude-3-sonnet-20240229",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: userMessage }]
     }),
   });
   
@@ -84,7 +84,7 @@ export const callAnthropicApi = async (userMessage: string, apiKey: string) => {
   
   if (!response.ok) throw new Error("Failed to get response from Anthropic");
   const data = await response.json();
-  return data.choices[0].message.content;
+  return data.content[0].text;
 };
 
 export const callPerplexityApi = async (userMessage: string, apiKey: string) => {
