@@ -1,5 +1,3 @@
-import type { ApiKeys } from "@/components/ApiKeyForm";
-
 export const callGrokApi = async (userMessage: string, apiKey: string) => {
   const proxyUrl = "https://cors-anywhere.herokuapp.com/https://api.x.ai/v1/chat/completions";
   const response = await fetch(proxyUrl, {
@@ -11,6 +9,7 @@ export const callGrokApi = async (userMessage: string, apiKey: string) => {
       "X-Requested-With": "XMLHttpRequest"
     },
     body: JSON.stringify({
+      model: "grok-v2",
       messages: [{ role: "user", content: userMessage }],
       stream: false,
       max_tokens: 1000,
