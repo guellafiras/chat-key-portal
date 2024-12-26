@@ -63,9 +63,14 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKeys.grok}`,
-              "X-Api-Key": apiKeys.grok
+              "Authorization": `Bearer ${apiKeys.grok}`,
+              "X-Api-Key": apiKeys.grok,
+              "Origin": window.location.origin,
+              "Access-Control-Request-Method": "POST",
+              "Access-Control-Request-Headers": "Content-Type, Authorization, X-Api-Key"
             },
+            credentials: "include",
+            mode: "cors",
             body: JSON.stringify({
               messages: [{ role: "user", content: userMessage }],
               stream: false,
