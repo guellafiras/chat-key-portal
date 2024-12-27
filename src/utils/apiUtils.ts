@@ -73,7 +73,17 @@ export const callAnthropicApi = async (userMessage: string, apiKey: string) => {
     body: JSON.stringify({
       model: "claude-3-sonnet-20240229",
       max_tokens: 1024,
-      messages: [{ role: "user", content: userMessage }]
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: userMessage
+            }
+          ]
+        }
+      ]
     }),
   });
   
@@ -83,7 +93,11 @@ export const callAnthropicApi = async (userMessage: string, apiKey: string) => {
     );
   }
   
-  if (!response.ok) throw new Error("Failed to get response from Anthropic");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`Failed to get response from Anthropic: ${errorData.error?.message || response.statusText}`);
+  }
+  
   const data = await response.json();
   return data.content[0].text;
 };
