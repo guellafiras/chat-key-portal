@@ -1,36 +1,61 @@
 const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
 
 export const callGrokApi = async (userMessage: string, apiKey: string) => {
-  const proxyUrl = `${CORS_PROXY}https://api.x.ai/v1/chat/completions`;
-  const response = await fetch(proxyUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-      "X-Requested-With": "XMLHttpRequest"
-    },
-    body: JSON.stringify({
-      model: "grok-2-1212",
-      messages: [{ role: "user", content: userMessage }],
-      stream: false,
-      max_tokens: 1000,
-      temperature: 0.7
-    }),
-  });
+  const proxyUrl = `${CORS_PROXY}https://api.groq.com/openai/v1/chat/completions`;
   
-  if (response.status === 403) {
-    throw new Error(
-      "CORS proxy access not granted. Please visit https://cors-anywhere.herokuapp.com/corsdemo and request temporary access."
-    );
+  // First check if API key is provided
+  if (!apiKey) {
+    throw new Error("Groq API key is required");
   }
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(`Failed to get response from Grok: ${errorData.error?.message || response.statusText}`);
+
+  try {
+    const response = await fetch(proxyUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: JSON.stringify({
+        model: "llama3-8b-8192",
+        messages: [
+          {
+            role: "user",
+            content: userMessage
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1024
+      }),
+    });
+    
+    if (response.status === 403) {
+      throw new Error(
+        "CORS proxy access not granted. Please visit https://cors-anywhere.herokuapp.com/corsdemo and request temporary access."
+      );
+    }
+    
+    if (response.status === 401) {
+      throw new Error(
+        "Invalid Groq API key. Please check your API key and ensure it's correctly entered in the API Keys form."
+      );
+    }
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Failed to get response from Groq: ${errorData.error?.message || response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (error) {
+    // If it's our custom error, throw it directly
+    if (error instanceof Error) {
+      throw error;
+    }
+    // For unexpected errors
+    throw new Error("Failed to communicate with Groq API");
   }
-  
-  const data = await response.json();
-  return data.choices[0].message.content;
 };
 
 export const callOpenAiApi = async (userMessage: string, apiKey: string) => {
@@ -124,49 +149,6 @@ export const callPerplexityApi = async (userMessage: string, apiKey: string) => 
   }
   
   if (!response.ok) throw new Error("Failed to get response from Perplexity");
-  const data = await response.json();
-  return data.choices[0].message.content;
-};
-
-export const callGroqApi = async (userMessage: string, apiKey: string) => {
-  const proxyUrl = `${CORS_PROXY}https://api.groq.com/openai/v1/chat/completions`;
-  const response = await fetch(proxyUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-      "X-Requested-With": "XMLHttpRequest"
-    },
-    body: JSON.stringify({
-      model: "llama3-8b-8192",
-      messages: [
-        {
-          role: "user",
-          content: userMessage
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 1024,
-      stream: false
-    }),
-  });
-  
-  if (response.status === 403) {
-    throw new Error(
-      "CORS proxy access not granted. Please visit https://cors-anywhere.herokuapp.com/corsdemo and request temporary access."
-    );
-  }
-  
-  if (response.status === 401) {
-    const errorData = await response.json();
-    throw new Error(`Authentication failed: ${errorData.error?.message || 'Invalid API key'}`);
-  }
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(`Failed to get response from Groq: ${errorData.error?.message || response.statusText}`);
-  }
-  
   const data = await response.json();
   return data.choices[0].message.content;
 };
