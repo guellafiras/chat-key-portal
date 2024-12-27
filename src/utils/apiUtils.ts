@@ -139,9 +139,15 @@ export const callGroqApi = async (userMessage: string, apiKey: string) => {
     },
     body: JSON.stringify({
       model: "mixtral-8x7b-32768",
-      messages: [{ role: "user", content: userMessage }],
+      messages: [
+        {
+          role: "user",
+          content: userMessage
+        }
+      ],
       temperature: 0.7,
       max_tokens: 1024,
+      stream: false
     }),
   });
   
@@ -149,6 +155,11 @@ export const callGroqApi = async (userMessage: string, apiKey: string) => {
     throw new Error(
       "CORS proxy access not granted. Please visit https://cors-anywhere.herokuapp.com/corsdemo and request temporary access."
     );
+  }
+  
+  if (response.status === 401) {
+    const errorData = await response.json();
+    throw new Error(`Authentication failed: ${errorData.error?.message || 'Invalid API key'}`);
   }
   
   if (!response.ok) {
