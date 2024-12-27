@@ -138,7 +138,7 @@ export const callGroqApi = async (userMessage: string, apiKey: string) => {
       "X-Requested-With": "XMLHttpRequest"
     },
     body: JSON.stringify({
-      model: "mixtral-8x7b-32768",
+      model: "llama3-8b-8192",
       messages: [
         {
           role: "user",
