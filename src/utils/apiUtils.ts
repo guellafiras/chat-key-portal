@@ -129,7 +129,7 @@ export const callPerplexityApi = async (userMessage: string, apiKey: string) => 
 };
 
 export const callGroqApi = async (userMessage: string, apiKey: string) => {
-  const proxyUrl = `${CORS_PROXY}https://api.groq.com/v1/chat/completions`;
+  const proxyUrl = `${CORS_PROXY}https://api.groq.com/openai/v1/chat/completions`;
   const response = await fetch(proxyUrl, {
     method: "POST",
     headers: {
