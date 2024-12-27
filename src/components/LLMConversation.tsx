@@ -5,9 +5,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import type { ApiKeys } from "./ApiKeyForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { callOpenAiApi, callAnthropicApi, callPerplexityApi, callGrokApi } from "@/utils/apiUtils";
+import { callOpenAiApi, callAnthropicApi, callPerplexityApi, callGrokApi, callGroqApi } from "@/utils/apiUtils";
 
-type LLMType = "openai" | "anthropic" | "perplexity" | "grok";
+type LLMType = "openai" | "anthropic" | "perplexity" | "grok" | "groq";
 
 interface LLMConversationProps {
   apiKeys: ApiKeys;
@@ -34,6 +34,8 @@ export const LLMConversation = ({ apiKeys }: LLMConversationProps) => {
         return await callAnthropicApi(message, apiKeys.anthropic!);
       case "perplexity":
         return await callPerplexityApi(message, apiKeys.perplexity!);
+      case "groq":
+        return await callGroqApi(message, apiKeys.groq!);
       default:
         throw new Error("Invalid model selected");
     }
@@ -89,6 +91,7 @@ export const LLMConversation = ({ apiKeys }: LLMConversationProps) => {
               <SelectItem value="anthropic">Anthropic</SelectItem>
               <SelectItem value="perplexity">Perplexity</SelectItem>
               <SelectItem value="grok">Grok</SelectItem>
+              <SelectItem value="groq">Groq</SelectItem>
             </SelectContent>
           </Select>
 
@@ -103,6 +106,7 @@ export const LLMConversation = ({ apiKeys }: LLMConversationProps) => {
               <SelectItem value="anthropic">Anthropic</SelectItem>
               <SelectItem value="perplexity">Perplexity</SelectItem>
               <SelectItem value="grok">Grok</SelectItem>
+              <SelectItem value="groq">Groq</SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -127,3 +127,35 @@ export const callPerplexityApi = async (userMessage: string, apiKey: string) => 
   const data = await response.json();
   return data.choices[0].message.content;
 };
+
+export const callGroqApi = async (userMessage: string, apiKey: string) => {
+  const proxyUrl = `${CORS_PROXY}https://api.groq.com/v1/chat/completions`;
+  const response = await fetch(proxyUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+      "X-Requested-With": "XMLHttpRequest"
+    },
+    body: JSON.stringify({
+      model: "mixtral-8x7b-32768",
+      messages: [{ role: "user", content: userMessage }],
+      temperature: 0.7,
+      max_tokens: 1024,
+    }),
+  });
+  
+  if (response.status === 403) {
+    throw new Error(
+      "CORS proxy access not granted. Please visit https://cors-anywhere.herokuapp.com/corsdemo and request temporary access."
+    );
+  }
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`Failed to get response from Groq: ${errorData.error?.message || response.statusText}`);
+  }
+  
+  const data = await response.json();
+  return data.choices[0].message.content;
+};

@@ -21,7 +21,7 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<"openai" | "anthropic" | "perplexity" | "grok">("openai");
+  const [selectedModel, setSelectedModel] = useState<"openai" | "anthropic" | "perplexity" | "grok" | "groq">("openai");
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,6 +51,9 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
           break;
         case "perplexity":
           aiMessage = await callPerplexityApi(userMessage, apiKeys.perplexity!);
+          break;
+        case "groq":
+          aiMessage = await callGroqApi(userMessage, apiKeys.groq!);
           break;
         default:
           throw new Error("Invalid model selected");
@@ -101,6 +104,7 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
             <SelectItem value="anthropic">Anthropic</SelectItem>
             <SelectItem value="perplexity">Perplexity</SelectItem>
             <SelectItem value="grok">Grok</SelectItem>
+            <SelectItem value="groq">Groq</SelectItem>
           </SelectContent>
         </Select>
       </div>
