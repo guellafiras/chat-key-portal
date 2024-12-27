@@ -67,7 +67,8 @@ export const callAnthropicApi = async (userMessage: string, apiKey: string) => {
       "Content-Type": "application/json",
       "x-api-key": apiKey,
       "X-Requested-With": "XMLHttpRequest",
-      "anthropic-version": "2023-06-01"
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
     },
     body: JSON.stringify({
       model: "claude-3-sonnet-20240229",
