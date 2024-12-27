@@ -1,6 +1,6 @@
 const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
 
-export const callGrokApi = async (userMessage: string, apiKey: string) => {
+export const callGroqApi = async (userMessage: string, apiKey: string) => {
   const proxyUrl = `${CORS_PROXY}https://api.groq.com/openai/v1/chat/completions`;
   
   // First check if API key is provided
