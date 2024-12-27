@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Loader2, ExternalLink } from "lucide-react";
 import type { ApiKeys } from "./ApiKeyForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { callGrokApi, callOpenAiApi, callAnthropicApi, callPerplexityApi } from "@/utils/apiUtils";
+import { callGrokApi, callOpenAiApi, callAnthropicApi, callPerplexityApi, callGroqApi } from "@/utils/apiUtils";
 
 interface Message {
   content: string;
@@ -141,3 +141,4 @@ export const ChatInterface = ({ apiKeys }: ChatInterfaceProps) => {
     </div>
   );
 };
+
